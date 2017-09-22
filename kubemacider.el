@@ -68,7 +68,7 @@ client process is started, the function is called with the client buffer."
                                        (format "%s-%s-%s"
                                                (last (split-string cluster "_"))
                                                namespace
-                                               (first (split-string pod-name "-"))))))
+                                               (car (split-string pod-name "-"))))))
          (cmd (mapconcat 'identity
                          (list kubemacider-kubectl-executable
                                (format "--cluster=%s" cluster)
