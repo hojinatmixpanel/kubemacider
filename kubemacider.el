@@ -35,7 +35,12 @@
           (message "port-forwarding started on %s:%s" local-port remote-port)
           (with-current-buffer server-buffer
             (let* ((client-proc (nrepl-start-client-process nil local-port process))
-                   (client-buffer (process-buffer client-proc)))
+                   (client-buffer (process-buffer client-proc))
+                   (client-buffer-name (replace-regexp-in-string "nrepl-server"
+                                                                 "cider-repl"
+                                                                 (buffer-name))))
+              (with-current-buffer client-buffer
+                (rename-buffer client-buffer-name))
               (setq nrepl-client-buffers
                     (cons client-buffer
                           (delete client-buffer nrepl-client-buffers)))
