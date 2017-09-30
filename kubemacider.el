@@ -125,4 +125,31 @@ ENDPOINT is a plist as returned by `nrepl-connect'."
          (nrepl-create-client-buffer-function  #'kubemacider--cider-repl-create))
     (apply 'kubemacider-start-portforward-process args)))
 
+(defun kubemacider--add-tramp-method (cluster namespace pod-name)
+  (let ((c (car (last (split-string cluster "_"))))
+        (n namespace)
+        (p (car (split-string pod-name "-"))))
+    (add-to-list 'tramp-methods
+                 `(,(format "kube-%s-%s-%s" c n p)
+                   (tramp-login-program "kubectl")
+                   (tramp-login-args
+                    (("exec")
+                     ("-it")
+                     (,pod-name)
+                     ("--namespace")
+                     (,namespace)
+                     ("--cluster")
+                     (,cluster)
+                     ("/bin/sh")))
+                   (tramp-login-env
+                    (("SHELL")
+                     ("/bin/sh")))
+                   (tramp-remote-shell "/bin/sh")))))
+
+(defun kubemacider-add-tramp-method ()
+  (interactive)
+  (let* ((cnp (kubemacider--interactive-select-cluster-namespace-pod)))
+    (apply 'kubemacider--add-tramp-method cnp)
+    (message (format "tramp method added for %s" cnp))))
+
 (provide 'kubemacider)
