@@ -1,15 +1,15 @@
 (require 'cider)
 (require 'kubernetes)
 
-(defun kubernetes--cluster-names (state)
-  (-let* ((config (or (kubernetes-state-config state) (kubernetes-kubectl-await-on-async kubernetes-props state #'kubernetes-kubectl-config-view)))
-          ((&alist 'clusters clusters) config))
-    (--map (alist-get 'name it) clusters)))
-
 (defcustom kubemacider-kubectl-executable "kubectl"
   "The kubectl command used for Kubernetes commands."
   :group 'kubemacider
   :type 'string)
+
+(defun kubernetes--cluster-names (state)
+  (-let* ((config (or (kubernetes-state-config state) (kubernetes-kubectl-await-on-async kubernetes-props state #'kubernetes-kubectl-config-view)))
+          ((&alist 'clusters clusters) config))
+    (--map (alist-get 'name it) clusters)))
 
 (defun kubemacider--portforward-server-filter (process output)
   "Process portforward server output from PROCESS contained in OUTPUT."
@@ -118,13 +118,6 @@ ENDPOINT is a plist as returned by `nrepl-connect'."
          (pd (completing-read "Pod: " pods nil t)))
     (list ct ns pd)))
 
-(defun kubemacider-mixpanel-swank ()
-  (interactive)
-  (let* ((cnp (kubemacider--interactive-select-cluster-namespace-pod))
-         (args (append cnp (list "0:7777")))
-         (nrepl-create-client-buffer-function  #'kubemacider--cider-repl-create))
-    (apply 'kubemacider-start-portforward-process args)))
-
 (defun kubemacider--add-tramp-method (cluster namespace pod-name)
   (let ((c (car (last (split-string cluster "_"))))
         (n namespace)
@@ -145,6 +138,13 @@ ENDPOINT is a plist as returned by `nrepl-connect'."
                     (("SHELL")
                      ("/bin/sh")))
                    (tramp-remote-shell "/bin/sh")))))
+
+(defun kubemacider-mixpanel-swank ()
+  (interactive)
+  (let* ((cnp (kubemacider--interactive-select-cluster-namespace-pod))
+         (args (append cnp (list "0:7777")))
+         (nrepl-create-client-buffer-function  #'kubemacider--cider-repl-create))
+    (apply 'kubemacider-start-portforward-process args)))
 
 (defun kubemacider-add-tramp-method ()
   (interactive)
