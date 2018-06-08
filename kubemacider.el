@@ -1,5 +1,5 @@
 (require 'cider)
-(require 'kubernetes)
+;; (require 'kubernetes)
 
 (defcustom kubemacider-kubectl-executable "kubectl"
   "The kubectl command used for Kubernetes commands."
@@ -151,5 +151,11 @@ ENDPOINT is a plist as returned by `nrepl-connect'."
   (let* ((cnp (kubemacider--interactive-select-cluster-namespace-pod)))
     (apply 'kubemacider--add-tramp-method cnp)
     (message (format "tramp method added for %s" cnp))))
+
+
+(defun kubemacider-jack-in (&optional prompt-project)
+  (interactive "P")
+  (let ((cider-lein-parameters "monolith with-all :select :default repl :headless :host ::"))
+    (cider-jack-in prompt-project)))
 
 (provide 'kubemacider)
